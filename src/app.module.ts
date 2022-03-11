@@ -6,8 +6,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { ReportsModule } from './reports/reports.module';
-import { User } from './users/user.entity';
-import { Report } from './reports/reports.entity';
+// import { User } from './users/user.entity';
+// import { Report } from './reports/reports.entity';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const cookieSession = require('cookie-session');
 
@@ -17,18 +17,7 @@ const cookieSession = require('cookie-session');
       isGlobal: true,
       envFilePath: `.env.${process.env.NODE_ENV}`,
     }),
-    TypeOrmModule.forRootAsync({
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => {
-        return {
-          type: 'sqlite',
-          database: config.get<string>('DB_NAME'),
-          synchronize: true,
-          entities: [User, Report],
-        };
-      },
-    }),
-
+    TypeOrmModule.forRoot(),
     UsersModule,
     ReportsModule,
   ],
@@ -46,11 +35,12 @@ const cookieSession = require('cookie-session');
 
 //use this to call the middleware in main.ts such as app.use
 export class AppModule {
+  constructor(private configService: ConfigService) {}
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(
         cookieSession({
-          keys: ['swejal'], //for encryption
+          keys: [this.configService.get('COOKIE_KEY')], //for encryption
         }),
       )
       .forRoutes('*'); //make use of middleware for  every single request(global middleware)

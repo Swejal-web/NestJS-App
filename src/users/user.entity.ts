@@ -6,7 +6,9 @@ import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
+  OneToMany,
 } from 'typeorm';
+import { Report } from '../reports/reports.entity';
 
 @Entity()
 export class User {
@@ -18,6 +20,12 @@ export class User {
 
   @Column()
   password: string;
+
+  @Column({ default: true })
+  admin: boolean;
+
+  @OneToMany(() => Report, (report) => report.user) //function that returns User entity class, and function that takes instance of user and retuurn report.user
+  reports: Report[];
 
   @AfterInsert()
   logInsert() {
